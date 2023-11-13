@@ -8,8 +8,7 @@ const HttpCode = require('../enums/HttpCode');
  * Creates a new user in the database
  * @param information about the new user
  * @returns An object on successful creation
- * @throws Error with a status code of 400 if the user already created
- * @throws Error with a status code of 500 if internal server error returned
+ * @throws Error with a status code of 409 if the user already created
  */
 const registerUser = async (email, password, firstName, lastName) => {
     const existingUser = await User.findOne({ email });
