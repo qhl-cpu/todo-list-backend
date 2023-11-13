@@ -1,18 +1,18 @@
-const ApiError = require('../exceptions/HttpError')
+const ApiError = require('../exceptions/HttpError');
 const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
 const User = require('../models/userModel'); // assuming you have a User model
 const HttpCode = require('../enums/HttpCode');
 
 /**
  * Creates a new user in the database
- * @param req HTTP request body that contains information about the new user
- * @returns A UserLoginRequestBody object on successful creation
+ * @param information about the new user
+ * @returns An object on successful creation
  * @throws Error with a status code of 400 if the user already created
  * @throws Error with a status code of 500 if internal server error returned
  */
 const registerUser = async (email, password, firstName, lastName) => {
     const existingUser = await User.findOne({ email });
-    console.log(existingUser)
     if (existingUser) {
         throw new ApiError(HttpCode.CONFLICT,'Email already taken');
     }
@@ -36,4 +36,30 @@ const registerUser = async (email, password, firstName, lastName) => {
     };
 };
 
-module.exports = { registerUser };
+/**
+ * Looks up the given email in the database and checks the correctness of the provided password
+ * @param Login info for the user
+ * @returns An object for the requested user on successful login
+ * @throws ApiError with a status code of 404 if the given user is not found
+ * @throws ApiError with a status code of 400 if the provided password is incorrect
+ */
+const loginUser = async (email, password) => {
+    const user = await User.findOne({ email });
+    if (!user) {
+        throw new ApiError(HttpCode.NOT_FOUND, `Could not find user with email ${email}`);
+    }
+
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+        throw new ApiError(HttpCode.BAD_REQUEST, "Incorrect password for user");
+    }
+
+    const userObj = user.toObject();
+    delete userObj.password;
+
+    const token = jwt.sign(userObj, process.env.MY_SECRET, { expiresIn: "10h" });
+
+    return { token, user: userObj };
+};
+
+module.exports = { registerUser, loginUser };

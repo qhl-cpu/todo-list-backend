@@ -1,8 +1,6 @@
 const express = require("express");
 const ApiError = require("../exceptions/HttpError"); // Adjust the path as per your project structure
 
-const { NextFunction, Request, Response } = express;
-
 const errorLogger = (err, req, res, next) => {
     console.error(err);
     next(err);

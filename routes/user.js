@@ -1,9 +1,6 @@
 const express = require('express');
-const User = require('../models/userModel');
 const HttpCode = require('../enums/HttpCode');
-const bcrypt = require('bcrypt');
-const jwt = require('jsonwebtoken');
-const { registerUser } = require('../services/userService');
+const { registerUser, loginUser } = require('../services/userService');
 
 const router = express.Router();
 
@@ -16,6 +13,24 @@ router.post('/register', async (req, res, next) => {
         
         const userInfo = await registerUser(email, password, firstName, lastName)
         return res.status(HttpCode.CREATED).json(userInfo);
+    } catch (error) {
+        next(error);
+    }
+});
+
+// POST user/login
+router.post('/login', async (req, res, next) => {
+    try {
+        const { email, password } = req.body;
+        const { token, user } = await loginUser(email, password);
+
+        res.cookie('token', token);
+        return res.status(HttpCode.OK).json({
+            _id: user._id,
+            firstName: user.firstName,
+            lastName: user.lastName,
+            email: user.email,
+        });
     } catch (error) {
         next(error);
     }
