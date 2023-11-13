@@ -61,4 +61,7 @@ const loginUser = async (email, password) => {
     return { token, user: userObj };
 };
 
-module.exports = { registerUser, loginUser };
+module.exports = {
+    registerUser,
+    loginUser
+};

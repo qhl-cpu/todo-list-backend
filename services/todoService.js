@@ -66,9 +66,27 @@ const deleteTodo = async (todoId, userId) => {
     return await Todo.deleteOne({ _id: todoId });
 };
 
+/**
+ * Filtering by category, searching by title individually, or a combination of both
+ * @param category The category of the todo item
+ * @param title The title of the user
+ * @returns a list of todo items that satisfy the filter requriements
+ */
+const getFilteredTodos = async (category, title) => {
+    const query = {};
+    if (category) {
+        query.category = category;
+    }
+    if (title) {
+        query.title = { $regex: title, $options: 'i' }; // Case-insensitive search
+    }
+    return await Todo.find(query);
+};
+
 module.exports = {
     findAllTodos,
     createTodo,
     updateTodo,
-    deleteTodo
+    deleteTodo,
+    getFilteredTodos
 };
