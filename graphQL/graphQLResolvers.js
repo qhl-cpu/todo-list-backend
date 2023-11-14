@@ -14,7 +14,6 @@ const resolvers = {
       // Fetch all todos
       Query: {
         getAllTodos: () => {
-              console.log(111)
           return findAllTodos();
         },
         // Fetch filtered todos
